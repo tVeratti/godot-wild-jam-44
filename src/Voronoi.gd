@@ -8,37 +8,59 @@ var height:int = 500
 var rng:RandomNumberGenerator = RandomNumberGenerator.new()
 
 var points:Array = []
+var delaunay:Array = []
+var circumcenters:Array = []
 var sites:Array = []
 
 
 func generate(num_points:int = 5, loops:int = 0):
 	rng.randomize()
-	generate_points(num_points)
 	
-	sites = get_delauney_polygons(points)
+	points = generate_points(num_points)
+	delaunay = get_delauney_polygons(points)
+	circumcenters = get_circumcenters(delaunay)
+	sites = []
 	
-	var new_sites = []
-	for loop_index in range(loops):
-		for index in sites.size():
-			var site = sites[index]
-			var inner_delauney = get_inner_delauney(site)
-			
-			new_sites += inner_delauney
-			
-		sites = new_sites
+	for point in points:
+		# Loop through the points used to create delauney triangles
+		# Get all triangles that touch this point; this means they are adjacent
+		var adjacent_circumcenters = []
+		for index in delaunay.size():
+			var triangle = delaunay[index]
+			for triangle_point in triangle:
+				if triangle_point == point and not adjacent_circumcenters.has(index):
+					adjacent_circumcenters.append(circumcenters[index])
+		
+#		adjacent_circumcenters.sort_custom(self, "sort_circumcenters")
+		sites.append(adjacent_circumcenters)
+		
 
 
 func generate_points(amount:int):
-	points = []
+	var vectors = []
 	
 	for i in range(amount):
-		points.append(Vector2(
+		vectors.append(Vector2(
 			rng.randi_range(0, width),
 			rng.randi_range(0, height)))
+		
+	return vectors
+
+
+func get_circumcenters(delaunay_triangles):
+	var centers = []
+	for triangle in delaunay_triangles:
+		var circumcenter = get_circumcenter(triangle[0], triangle[1], triangle[2])
+		centers.append(circumcenter)
+	
+	return centers
+
+
+func sort_circumcenters(a, b):
+	return atan2(a.x, a.y) - atan2(b.x, b.y)
 
 
 func get_inner_delauney(triangle, new_point = null):
-	
 	if new_point == null:
 		new_point = Vector2.ZERO
 		for point in triangle:
@@ -76,9 +98,29 @@ func get_delauney_polygons(inner_points):
 	return all_polygons
 
 
+func get_circumcenter(a:Vector2, b:Vector2, c:Vector2):
+	var x1 = a.x
+	var y1 = a.y
+	var x2 = b.x
+	var y2 = b.y
+	var x3 = c.x
+	var y3 = c.y
+	
+	var a2 = x1 - x2;
+	var a3 = x1 - x3;
+	var b2 = y1 - y2;
+	var b3 = y1 - y3;
+	var d1 = x1 * x1 + y1 * y1;
+	var d2 = d1 - x2 * x2 - y2 * y2;
+	var d3 = d1 - x3 * x3 - y3 * y3;
+	var ab = (a3 * b2 - a2 * b3) * 2;
+	var xa = (b2 * d3 - b3 * d2) / ab - x1;
+	var ya = (a3 * d2 - a2 * d3) / ab - y1;
+	
+	return Vector2(x1 + xa, y1 + ya)
+
+
 func hypot(x, y):
 	return sqrt(pow(x - 1, 2) + pow(y - 1, 2))
 
-func add_site_points():
-	pass
 
