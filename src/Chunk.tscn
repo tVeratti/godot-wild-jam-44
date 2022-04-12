@@ -17,4 +17,5 @@ antialiased = true
 self_modulate = Color( 1, 1, 1, 0.376471 )
 color = Color( 1, 1, 1, 0.188235 )
 
+[connection signal="area_entered" from="." to="." method="_on_Chunk_area_entered"]
 [connection signal="input_event" from="." to="." method="_on_Chunk_input_event"]

@@ -10,12 +10,12 @@ config_version=4
 
 _global_script_classes=[ {
 "base": "Object",
-"class": "Voronoi",
+"class": "ChunkGenerator",
 "language": "GDScript",
-"path": "res://Voronoi.gd"
+"path": "res://Chunks.gd"
 } ]
 _global_script_class_icons={
-"Voronoi": ""
+"ChunkGenerator": ""
 }
 
 [application]
